@@ -9,10 +9,6 @@ import time
 # $ - pip install gitpython
 from git import Repo 
 
-########
-# INSTRUCTION
-# Remember to pull both branches before running
-
 def get_id(commit):
     return 
     return u"{} by {}".format(commit.summary, commit.author.name)
@@ -67,20 +63,21 @@ if __name__ == "__main__":
         exit(1)
 
     branch_name = sys.argv[1]
-    parent_commit = repo.merge_base(repo.branches['master'], repo.branches['{}'.format(branch_name)])[0]
+    base_branch_name = "master" if len(sys.argv) < 3 else sys.argv[2]
+    parent_commit = repo.merge_base(repo.branches['{}'.format(base_branch_name)], repo.branches['{}'.format(branch_name)])[0]
     parent_hex = parent_commit.hexsha
 
     branch_commits = list(repo.iter_commits('{}...{}'.format(branch_name, parent_hex)))
     branch_summaries = map(lambda commit: commit.summary, branch_commits)
     branch_summaries_count_dict = build_dict(branch_summaries)
 
-    master_commits = list(repo.iter_commits('master...{}'.format(parent_hex)))
+    master_commits = list(repo.iter_commits('{}...{}'.format(base_branch_name, parent_hex)))
     master_summaries = map(lambda commit: commit.summary, master_commits)
     master_summaries_count_dict = build_dict(master_summaries)
 
     print(" * * *")
     print(" * ")
-    print(" *    Compare {} and MASTER".format(branch_name.upper()))
+    print(" *    Compare {} and {}".format(branch_name.upper(), base_branch_name.upper()))
     print(" *    from mutual ancestor {} - {}".format(parent_hex, parent_commit.summary))
     print(" * ")
     print(" * * * * * * * * * * * *\n")
